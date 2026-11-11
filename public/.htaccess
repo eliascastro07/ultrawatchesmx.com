@@ -1,0 +1,54 @@
+# ============================================================================
+# ULTRA WATCHES MX — cache + delivery rules
+# ============================================================================
+
+# --- Compression -------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml application/xml
+</IfModule>
+
+# --- Pretty trailing-slash routing for /404, /_not-found -------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # If request is for a directory without trailing slash and an index.html exists
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^(.*[^/])$ /$1/ [L,R=301]
+</IfModule>
+
+# --- Cache headers -----------------------------------------------------------
+<IfModule mod_headers.c>
+
+  # HTML — NEVER cache. Also tell SiteGround / Cloudflare / generic CDNs
+  # to NEVER cache HTML at any layer.
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, private"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    Header set X-Accel-Expires "0"
+    Header set CDN-Cache-Control "no-store"
+    Header set Surrogate-Control "no-store"
+    Header set Cloudflare-CDN-Cache-Control "no-store"
+  </FilesMatch>
+
+  # Hash-stamped Next.js chunks — cache forever (immutable).
+  <FilesMatch "^(.*\.[0-9a-f~_-]{8,})\.(js|css|woff2|woff)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Generic static assets (favicon, og images) — cache 1 day.
+  <FilesMatch "\.(svg|png|jpg|jpeg|webp|ico|gif)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+
+  # Security headers
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+</IfModule>
+
+# --- Custom 404 --------------------------------------------------------------
+ErrorDocument 404 /404.html
