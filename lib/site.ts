@@ -1,4 +1,4 @@
-Meexport const SITE = {
+export const SITE = {
   name: "Ultra Watches MX",
   shortName: "ULTRA",
   tagline: "Compra · Venta · Permuta de Relojes de Lujo",
